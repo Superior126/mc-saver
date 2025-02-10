@@ -1,5 +1,5 @@
-# MC Saver
-MC Saver is a whole server backup solution that automatically backs up your Minecraft Server.
+<h1 align="center">MC Saver</h1>
+<p align="center">MC Saver is a whole server backup solution that automatically backs up your Minecraft Server.</p>
 
 > [!IMPORTANT]
 > This package only works if you are using [docker](https://github.com/itzg/docker-minecraft-server) to host your Minecraft server. If you arn't, this solution is not for you. 
