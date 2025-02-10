@@ -1,2 +1,25 @@
+# ---------- Python ----------
 /app/.venv
 __pycache__
+
+# ---------- Node ------------
+/web-console/node_modules
+/web-console/.pnp
+/web-console.pnp.js
+
+# testing
+/web-console/coverage
+
+# production
+/web-console/build
+
+# misc
+/web-console/.DS_Store
+/web-console/.env.local
+/web-console/.env.development.local
+/web-console/.env.test.local
+/web-console/.env.production.local
+
+/web-console/npm-debug.log*
+/web-console/yarn-debug.log*
+/web-console/yarn-error.log*
