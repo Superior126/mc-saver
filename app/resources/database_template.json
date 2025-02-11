@@ -1,0 +1,41 @@
+[
+    {
+        "name": "table1",
+        "columns": [
+            {
+                "name": "column1",
+                "type": "string",
+                "primary_key": true
+            },
+            {
+                "name": "column2",
+                "type": "number"
+            },
+            {
+                "name": "column3",
+                "type": "boolean"
+            }
+        ]
+    },
+    {
+        "name": "table2",
+        "columns": [
+            {
+                "name": "column1",
+                "type": "string"
+            },
+            {
+                "name": "column2",
+                "type": "number"
+            },
+            {
+                "name": "column3",
+                "type": "boolean"
+            },
+            {
+                "name": "column4",
+                "type": "date"
+            }
+        ]
+    }
+]
