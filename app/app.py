@@ -1,7 +1,10 @@
 from flask import Flask, send_from_directory
 import os
+from utils.config_interface import ConfigInterface
 
 app = Flask(__name__, static_folder='flask_static')
+
+config = ConfigInterface()
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
