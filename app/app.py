@@ -1,10 +1,12 @@
 from flask import Flask, send_from_directory
 import os
 from utils.config_interface import ConfigInterface
+from utils.db_interface import DatabaseInterface
 
 app = Flask(__name__, static_folder='flask_static')
 
 config = ConfigInterface()
+database = DatabaseInterface()
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
