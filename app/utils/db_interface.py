@@ -1,11 +1,15 @@
 import os
 import sqlite3
 import json
+import uuid
+import hashlib
+import datetime
 
 class DatabaseInterface:
     def __init__(self):
-        self.db = None
+        pass
 
+    def get_connection(self):
         # Check if db dir exists
         if os.path.exists('/var/lib/mc_saver'):
             db_dir = '/var/lib/mc_saver'
@@ -14,8 +18,8 @@ class DatabaseInterface:
             db_dir = '/var/lib/mc_saver'
 
         # Connect to db
-        self.db = sqlite3.connect(db_dir + '/data.db')
-        self.cursor = self.db.cursor()
+        db = sqlite3.connect(db_dir + '/data.db')
+        cursor = db.cursor()
 
         # Get current run directory
         run_dir = os.path.dirname(os.path.realpath(__file__))
@@ -44,14 +48,14 @@ class DatabaseInterface:
             table_schema = table_schema[:-2]
 
             # Create table
-            self.cursor.execute(f"CREATE TABLE IF NOT EXISTS {table['name']} ({table_schema})")
-            self.db.commit()
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table['name']} ({table_schema})")
+            db.commit()
 
         # Ensure all columns are present
         for table in self.db_template:
             for column in table['columns']:
-                self.cursor.execute(f"PRAGMA table_info({table['name']})")
-                columns = self.cursor.fetchall()
+                cursor.execute(f"PRAGMA table_info({table['name']})")
+                columns = cursor.fetchall()
 
                 column_names = [column[1] for column in columns]
 
@@ -63,5 +67,79 @@ class DatabaseInterface:
                         column_schema += ' PRIMARY KEY'
 
                     # Add column to table
-                    self.cursor.execute(f"ALTER TABLE {table['name']} ADD COLUMN {column_schema}")
-                    self.db.commit()
+                    cursor.execute(f"ALTER TABLE {table['name']} ADD COLUMN {column_schema}")
+                    db.commit()
+
+        return db
+
+    def ensure_root_user_exist(self):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        # Check if root user exists
+        root_user = cursor.execute("SELECT * FROM users WHERE rootUser = 1").fetchone()
+
+        if not root_user:
+            # Generate root user id
+            root_user_id = str(uuid.uuid4())
+
+            # Generate root user salt
+            root_user_salt = os.urandom(16).hex()
+
+            # Hash root user password
+            root_user_password = hashlib.sha512(('root' + root_user_salt).encode()).hexdigest()
+
+            # Insert root user into database
+            cursor.execute("INSERT INTO users (userId, username, password, passwordSalt, rootUser) VALUES (?, ?, ?, ?, ?)", 
+                                (root_user_id, 'root', root_user_password, root_user_salt, 1))
+            conn.commit()
+
+        conn.close()
+
+    def login(self, username, password):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        # Get user from database
+        user = cursor.execute("SELECT userId, username, password, passwordSalt FROM users WHERE username = ?", 
+                                   (username,)).fetchone()
+
+        if not user:
+            raise self.Exceptions.InvalidCredentials
+
+        # Hash password
+        password_hash = hashlib.sha512((password + user[3]).encode()).hexdigest()
+
+        # Check if password is correct
+        if password_hash != user[2]:
+            raise self.Exceptions.InvalidCredentials
+        
+        # Generate a session token
+        session_token = str(uuid.uuid4())
+
+        # Get current UTC time and calculate expiration time
+        current_time = datetime.datetime.now(datetime.timezone.utc)
+        expiration_time = current_time + datetime.timedelta(days=1)
+        expiration_time_str = expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+
+        # Add session to database
+        cursor.execute("INSERT INTO sessions (sessionId, userId, expiration) VALUES (?, ?, ?)", 
+                            (session_token, user[0], expiration_time_str))
+        conn.commit()
+        conn.close()
+
+        return session_token, expiration_time_str
+    
+    def logout(self, session_id):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM sessions WHERE sessionId = ?", (session_id,))
+        conn.commit()
+        conn.close()
+    
+    class Exceptions:
+        class InvalidCredentials(Exception):
+            """Raised when invalid credentials are provided"""
+            pass
+            

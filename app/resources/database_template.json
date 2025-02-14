@@ -1,40 +1,45 @@
 [
     {
-        "name": "table1",
+        "name": "users",
         "columns": [
             {
-                "name": "column1",
+                "name": "userId",
                 "type": "string",
                 "primary_key": true
             },
             {
-                "name": "column2",
-                "type": "number"
+                "name": "username",
+                "type": "string"
             },
             {
-                "name": "column3",
+                "name": "password",
+                "type": "string"
+            },
+            {
+                "name": "passwordSalt",
+                "type": "string"
+            },
+            {
+                "name": "rootUser",
                 "type": "boolean"
             }
         ]
     },
     {
-        "name": "table2",
+        "name": "sessions",
         "columns": [
             {
-                "name": "column1",
+                "name": "sessionId",
+                "type": "string",
+                "primary_key": true
+            },
+            {
+                "name": "userId",
                 "type": "string"
             },
             {
-                "name": "column2",
-                "type": "number"
-            },
-            {
-                "name": "column3",
-                "type": "boolean"
-            },
-            {
-                "name": "column4",
-                "type": "date"
+                "name": "expiration",
+                "type": "datetime"
             }
         ]
     }

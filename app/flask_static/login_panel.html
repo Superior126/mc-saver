@@ -1,0 +1,58 @@
+<!--TESTING PLS REMOVE-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Panel</title>
+</head>
+<script>
+    function handle_login(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        })
+        .then(response => {
+            if (response.status === 200) {
+                alert('Login successful');
+            } else {
+                alert('Login failed');
+            }
+        })
+    }
+
+    function handle_logout() {
+        fetch('/api/auth/logout', {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.status === 200) {
+                alert('Logout successful');
+            } else {
+                alert('Logout failed');
+            }
+        })
+    }
+</script>
+<body>
+    <form onsubmit="handle_login(event)" id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <input type="submit" value="Login">
+    </form>
+    <button onclick="handle_logout()">Log Out</button>
+</body>
+</html>
